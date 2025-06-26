@@ -1,0 +1,20 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# SQLite DB
+db.sqlite3
+
+# Django secret key file (if you use one)
+.env
+
+# Virtual environment
+venv/
+
+# VS Code settings
+.vscode/
+
+# Migrations (optional, if auto-generated)
+*/migrations/__pycache__/
+*/migrations/*.pyc
