@@ -1,8 +1,11 @@
 from django.urls import path
+from .views import ProductCreateView
+from .views import CategoryCreateView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .views import (
+    LogoutView,
     RegisterView,
-    ProductListView,
+    ProductCreateView,
     ProductDetailView,
     CartView,
     AddToCartView,
@@ -14,9 +17,13 @@ urlpatterns = [
     # Auth
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('logout/', LogoutView.as_view(), name='logout'),
 
+    # Categories
+    path('categories/', CategoryCreateView.as_view(), name='category-list-create'),
+    
     # Products
-    path('products/', ProductListView.as_view(), name='product-list'),
+     path('products/', ProductCreateView.as_view(), name='product-list-create'),
     path('products/<int:product_id>/', ProductDetailView.as_view(), name='product-detail'),
 
     # Cart

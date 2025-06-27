@@ -1,18 +1,16 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
-from django.contrib.auth import authenticate
-from rest_framework import serializers
+from django.contrib.auth import get_user_model, authenticate
 from ecomAPP.models import Product, Order, OrderItem, CartItem, Category
 
 User = get_user_model()
 
-# USER SERIALIZERS
 
+# USER SERIALIZERS
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'role', 'is_active', 'date_joined']
-        read_only_fields = ['is_active', 'date_joined']
+        read_only_fields = ['id', 'is_active', 'date_joined']
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -21,7 +19,9 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email', 'password', 'role']
-        extra_kwargs = {'role': {'default': 'customer'}}
+        extra_kwargs = {
+            'role': {'default': 'customer'}
+        }
 
     def create(self, validated_data):
         user = User(
@@ -32,6 +32,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
@@ -44,12 +45,18 @@ class LoginSerializer(serializers.Serializer):
         return user
 
 
-# CATEGORY SERIALIZER
+class LogoutSerializer(serializers.Serializer):
+    def validate(self, data):
+        return data
 
+
+
+# CATEGORY SERIALIZE
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields  = ['id', 'name', 'slug', 'description']
+        fields = ['id', 'name', 'slug', 'description']
+
 
 
 # PRODUCT SERIALIZER
@@ -69,7 +76,7 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'seller']
 
-# -----------------------
+
 # CART ITEM SERIALIZER
 class CartItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
@@ -95,8 +102,8 @@ class CartItemSerializer(serializers.ModelSerializer):
         return instance
 
 
-# ORDER ITEM SERIALIZER
 
+# ORDER ITEM SERIALIZER
 class OrderItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
 
@@ -107,7 +114,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 # ORDER SERIALIZER
 class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True, read_only=True)
+    items = OrderItemSerializer(source='order_items', many=True, read_only=True)
 
     class Meta:
         model = Order

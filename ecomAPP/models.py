@@ -2,8 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-# Custom User Model
 
+# Custom User Model
 class User(AbstractUser):
     ROLE_CHOICES = (
         ('customer', 'Customer'),
@@ -42,7 +42,13 @@ class Product(models.Model):
     stock = models.PositiveIntegerField()
     image = models.ImageField(upload_to='products/', blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
-    seller = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, limit_choices_to={'role': 'seller'})
+    seller = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        limit_choices_to={'role': 'seller'}
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -52,18 +58,20 @@ class Product(models.Model):
 
 
 # Cart Item Model
+
 class CartItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart_items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='cart_items')
-    quantity = models.PositiveIntegerField(default=1)  # ✅ Default should be at least 1
+    quantity = models.PositiveIntegerField(default=1)
     added_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.quantity} x {self.product.title}"
+        return f"{self.quantity} x {self.product.title} (User: {self.user.username})"
 
 
 
 # Order Model
+
 class Order(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
@@ -77,7 +85,7 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Order #{self.id} by {self.user.username}"
+        return f"Order #{self.id} - {self.user.username} - {self.status}"
 
 
 
