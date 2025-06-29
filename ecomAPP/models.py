@@ -1,8 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-
-
 # Custom User Model
 class User(AbstractUser):
     ROLE_CHOICES = (
@@ -22,9 +20,7 @@ class User(AbstractUser):
         return f"{self.username} ({self.role})"
 
 
-
 # Category Model
-
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
@@ -56,9 +52,7 @@ class Product(models.Model):
         return self.title
 
 
-
 # Cart Item Model
-
 class CartItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart_items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='cart_items')
@@ -69,9 +63,7 @@ class CartItem(models.Model):
         return f"{self.quantity} x {self.product.title} (User: {self.user.username})"
 
 
-
 # Order Model
-
 class Order(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
@@ -86,7 +78,6 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order #{self.id} - {self.user.username} - {self.status}"
-
 
 
 # Order Item Model

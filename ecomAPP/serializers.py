@@ -4,7 +4,6 @@ from ecomAPP.models import Product, Order, OrderItem, CartItem, Category
 
 User = get_user_model()
 
-
 # USER SERIALIZERS
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,9 +18,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email', 'password', 'role']
-        extra_kwargs = {
-            'role': {'default': 'customer'}
-        }
+        extra_kwargs = {'role': {'default': 'customer'}}
 
     def create(self, validated_data):
         user = User(
@@ -50,13 +47,34 @@ class LogoutSerializer(serializers.Serializer):
         return data
 
 
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True, required=True)
+    new_password = serializers.CharField(write_only=True, required=True, min_length=8)
 
-# CATEGORY SERIALIZE
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Old password is incorrect.")
+        return value
+
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        user.set_password(self.validated_data['new_password'])
+        user.save()
+        return user
+
+
+class UpdateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'role', 'is_active']
+
+
+# CATEGORY SERIALIZER
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name', 'slug', 'description']
-
 
 
 # PRODUCT SERIALIZER
@@ -102,7 +120,6 @@ class CartItemSerializer(serializers.ModelSerializer):
         return instance
 
 
-
 # ORDER ITEM SERIALIZER
 class OrderItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
@@ -110,6 +127,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = ['id', 'order', 'product', 'quantity', 'price_at_order_time']
+        read_only_fields = ['id', 'price_at_order_time']
 
 
 # ORDER SERIALIZER
@@ -120,3 +138,31 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['id', 'user', 'total_amount', 'status', 'created_at', 'updated_at', 'items']
         read_only_fields = ['id', 'created_at', 'updated_at', 'total_amount', 'user']
+
+
+class CreateOrderSerializer(serializers.Serializer):
+    def validate(self, data):
+        user = self.context['request'].user
+        cart_items = CartItem.objects.filter(user=user)
+        if not cart_items.exists():
+            raise serializers.ValidationError("Cart is empty.")
+        return data
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        cart_items = CartItem.objects.filter(user=user)
+        total_amount = sum(item.product.price * item.quantity for item in cart_items)
+
+        order = Order.objects.create(user=user, total_amount=total_amount)
+
+        for item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price_at_order_time=item.product.price
+            )
+            # Optionally decrease stock: item.product.stock -= item.quantity
+
+        cart_items.delete()
+        return order
