@@ -10,7 +10,9 @@ class User(AbstractUser):
     )
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='customer')
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)  # Set False by default, activated after OTP verification
+    is_verified = models.BooleanField(default=False)  # Tracks if the user verified OTP
+    verification_code = models.CharField(max_length=6, blank=True, null=True)  # Stores OTP
     date_joined = models.DateTimeField(auto_now_add=True)
 
     USERNAME_FIELD = 'email'
@@ -18,7 +20,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.role})"
-
 
 # Category Model
 class Category(models.Model):

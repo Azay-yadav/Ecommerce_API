@@ -115,3 +115,12 @@ SWAGGER_SETTINGS = {
 # CORS configuration
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'ajaykumaryadav02042000@gmail.com'
+EMAIL_HOST_PASSWORD = 'gqnz oxus xqhj nlyl'  # Use App Password if 2FA enabled
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
