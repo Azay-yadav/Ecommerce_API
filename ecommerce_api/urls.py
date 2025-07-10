@@ -1,5 +1,6 @@
+from django.conf import settings
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.urls import include, path
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -29,10 +30,19 @@ urlpatterns = [
     # Django Admin
     path('admin/', admin.site.urls),
 
-    # Your main app API
-    path('api/', include('ecomAPP.urls')),
+    # Main app APIs
+    path('api/', include('CartItem.urls')),
+    path('api/', include('Categories.urls')),
+    path('api/', include('OrderItems.urls')),
+    path('api/', include('Orders.urls')),
+    path('api/', include('products.urls')),
+    path('api/', include('Users.urls')),
 
     # Swagger & ReDoc
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [path('__debug__/', include(debug_toolbar.urls))] + urlpatterns
